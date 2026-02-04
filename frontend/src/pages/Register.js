@@ -5,10 +5,10 @@ import { useAuth } from '../context/AuthContext';
 const Register = () => {
   const [formData, setFormData] = useState({
     name: '',
+    email: '',
     mobile: '',
     place: '',
-    gender: true,
-    password: ''
+    gender: true
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -31,8 +31,8 @@ const Register = () => {
     e.preventDefault();
     setError('');
 
-    if (formData.password.length < 8) {
-      setError('Password must be at least 8 characters');
+    if (!formData.email && !formData.mobile) {
+      setError('Please provide either email or mobile number');
       return;
     }
 
@@ -78,14 +78,27 @@ const Register = () => {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Mobile Number
+              Email (optional if you provide mobile)
+            </label>
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+              placeholder="Enter your email"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Mobile Number (optional if you provide email)
             </label>
             <input
               type="tel"
               name="mobile"
               value={formData.mobile}
               onChange={handleChange}
-              required
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
               placeholder="Enter your mobile number"
             />
@@ -132,22 +145,6 @@ const Register = () => {
                 Female
               </label>
             </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Password
-            </label>
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              required
-              minLength="8"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-              placeholder="Create a password (min 8 characters)"
-            />
           </div>
 
           <button

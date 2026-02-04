@@ -3,7 +3,7 @@ import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { 
   FaHome, FaStore, FaQuestionCircle, FaTrophy, 
-  FaCommentAlt, FaBell, FaUser, FaBars, FaTimes, FaSignOutAlt, FaUserShield, FaBookmark, FaCalendarAlt
+  FaCommentAlt, FaBell, FaUser, FaBars, FaTimes, FaSignOutAlt, FaUserShield, FaBookmark, FaCalendarAlt, FaImages
 } from 'react-icons/fa';
 import logo from '../../assets/connecta-logo.svg';
 
@@ -62,6 +62,15 @@ const Layout = () => {
                   <span>{item.label}</span>
                 </Link>
               ))}
+              <a
+                href="https://connecta.eventhex.ai/ai-gallery"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center space-x-2 shrink-0 hover:text-primary-200 transition"
+              >
+                <FaImages />
+                <span>Ai-Gallery</span>
+              </a>
               {isAdmin && (
                 <Link
                   to="/admin"
@@ -118,6 +127,16 @@ const Layout = () => {
                   <span>{item.label}</span>
                 </Link>
               ))}
+              <a
+                href="https://connecta.eventhex.ai/ai-gallery"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => setMobileMenuOpen(false)}
+                className="flex items-center space-x-3 py-2 hover:bg-primary-600 px-3 rounded transition"
+              >
+                <FaImages />
+                <span>Ai-Gallery</span>
+              </a>
               {isAuthenticated && (
                 <>
                   <Link
@@ -163,7 +182,7 @@ const Layout = () => {
       {/* Bottom Navigation (Mobile Only) */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 glass-strong border-t border-white/20 safe-bottom shadow-lg">
         <div className="flex justify-around items-center h-16">
-          {(isAuthenticated ? authenticatedNavItems.slice(0, 5) : navItems.slice(0, 5)).map((item) => (
+          {(isAuthenticated ? authenticatedNavItems.slice(0, 4) : navItems.slice(0, 4)).map((item) => (
             <Link
               key={item.path}
               to={item.path}
@@ -173,6 +192,15 @@ const Layout = () => {
               <span className="text-xs mt-1">{item.label}</span>
             </Link>
           ))}
+          <a
+            href="https://connecta.eventhex.ai/ai-gallery"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex flex-col items-center justify-center flex-1 h-full text-gray-700 hover:text-primary-600 transition-morph"
+          >
+            <span className="text-xl"><FaImages /></span>
+            <span className="text-xs mt-1">Ai-Gallery</span>
+          </a>
         </div>
       </nav>
 

@@ -5,7 +5,7 @@ import { quizAPI, authAPI } from '../services/apiServices';
 import { toast } from 'react-toastify';
 import { 
   FaUser, FaPhone, FaMapMarkerAlt, FaBookmark, FaHistory, FaTrophy, 
-  FaClock, FaCheckCircle, FaEdit, FaKey 
+  FaClock, FaCheckCircle, FaEdit 
 } from 'react-icons/fa';
 
 const Profile = () => {
@@ -16,16 +16,23 @@ const Profile = () => {
   const [editMode, setEditMode] = useState(false);
   const [formData, setFormData] = useState({
     name: user?.name || '',
+    email: user?.email || '',
     mobile: user?.mobile || '',
     place: user?.place || '',
     gender: user?.gender ?? true
   });
-  const [passwordForm, setPasswordForm] = useState({
-    currentPassword: '',
-    newPassword: '',
-    confirmPassword: ''
-  });
-  const [showPasswordForm, setShowPasswordForm] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        name: user.name || '',
+        email: user.email || '',
+        mobile: user.mobile || '',
+        place: user.place || '',
+        gender: user.gender ?? true
+      });
+    }
+  }, [user]);
 
   useEffect(() => {
     if (activeTab === 'quiz-history') {
@@ -54,32 +61,6 @@ const Profile = () => {
       setEditMode(false);
     } catch (error) {
       toast.error('Failed to update profile');
-    }
-  };
-
-  const handleChangePassword = async (e) => {
-    e.preventDefault();
-    
-    if (passwordForm.newPassword !== passwordForm.confirmPassword) {
-      toast.error('Passwords do not match');
-      return;
-    }
-
-    if (passwordForm.newPassword.length < 8) {
-      toast.error('Password must be at least 8 characters');
-      return;
-    }
-
-    try {
-      await authAPI.changePassword({
-        currentPassword: passwordForm.currentPassword,
-        newPassword: passwordForm.newPassword
-      });
-      toast.success('Password changed successfully');
-      setShowPasswordForm(false);
-      setPasswordForm({ currentPassword: '', newPassword: '', confirmPassword: '' });
-    } catch (error) {
-      toast.error(error.response?.data?.message || 'Failed to change password');
     }
   };
 
@@ -217,6 +198,10 @@ const Profile = () => {
                       <p className="text-lg text-gray-800">{user?.name}</p>
                     </div>
                     <div>
+                      <label className="text-sm text-gray-600 font-medium">Email</label>
+                      <p className="text-lg text-gray-800">{user?.email || 'N/A'}</p>
+                    </div>
+                    <div>
                       <label className="text-sm text-gray-600 font-medium">Phone Number</label>
                       <p className="text-lg text-gray-800">{user?.mobile || 'N/A'}</p>
                     </div>
@@ -240,72 +225,6 @@ const Profile = () => {
                     </div>
                   </div>
 
-                  <div className="mt-8">
-                    <button
-                      onClick={() => setShowPasswordForm(!showPasswordForm)}
-                      className="flex items-center space-x-2 px-4 py-2 border-2 border-gray-300 text-gray-700 rounded-lg hover:border-primary-600 hover:text-primary-600 transition"
-                    >
-                      <FaKey />
-                      <span>Change Password</span>
-                    </button>
-                  </div>
-
-                  {showPasswordForm && (
-                    <form onSubmit={handleChangePassword} className="mt-6 space-y-4 bg-gray-50 p-6 rounded-lg">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Current Password
-                        </label>
-                        <input
-                          type="password"
-                          value={passwordForm.currentPassword}
-                          onChange={(e) => setPasswordForm({...passwordForm, currentPassword: e.target.value})}
-                          required
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          New Password
-                        </label>
-                        <input
-                          type="password"
-                          value={passwordForm.newPassword}
-                          onChange={(e) => setPasswordForm({...passwordForm, newPassword: e.target.value})}
-                          required
-                          minLength="8"
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Confirm New Password
-                        </label>
-                        <input
-                          type="password"
-                          value={passwordForm.confirmPassword}
-                          onChange={(e) => setPasswordForm({...passwordForm, confirmPassword: e.target.value})}
-                          required
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
-                        />
-                      </div>
-                      <div className="flex space-x-3">
-                        <button
-                          type="submit"
-                          className="px-6 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition"
-                        >
-                          Update Password
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setShowPasswordForm(false)}
-                          className="px-6 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 transition"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    </form>
-                  )}
                 </div>
               ) : (
                 <form onSubmit={handleUpdateProfile}>
@@ -325,13 +244,23 @@ const Profile = () => {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Email
+                      </label>
+                      <input
+                        type="email"
+                        value={formData.email}
+                        onChange={(e) => setFormData({...formData, email: e.target.value})}
+                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
                         Phone Number
                       </label>
                       <input
                         type="tel"
                         value={formData.mobile}
                         onChange={(e) => setFormData({...formData, mobile: e.target.value})}
-                        required
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
                       />
                     </div>

@@ -8,30 +8,41 @@ const generateToken = (id) => {
   });
 };
 
-// @desc    Register user
+// @desc    Register user (passwordless)
 // @route   POST /api/auth/register
 // @access  Public
 exports.register = async (req, res, next) => {
   try {
-    const { name, password, mobile, place, gender } = req.body;
+    const { name, email, mobile, place, gender } = req.body;
 
-    // Check if user already exists
-    const existingUser = await User.findOne({ mobile });
-    if (existingUser) {
+    // Require at least one of email or mobile for login later
+    if (!email && !mobile) {
       return res.status(400).json({
         success: false,
-        message: 'User already exists with this phone number'
+        message: 'Please provide either email or mobile number'
       });
     }
 
-    // Create user
-    const user = await User.create({
-      name,
-      password,
-      mobile,
-      place,
-      gender
+    // Check if user already exists by email or mobile
+    const existingUser = await User.findOne({
+      $or: [
+        ...(email ? [{ email: email.toLowerCase() }] : []),
+        ...(mobile ? [{ mobile }] : [])
+      ].filter(Boolean)
     });
+    if (existingUser) {
+      return res.status(400).json({
+        success: false,
+        message: 'User already exists with this email or phone number'
+      });
+    }
+
+    // Create user (no password)
+    const userData = { name, place, gender };
+    if (email) userData.email = email.toLowerCase();
+    if (mobile) userData.mobile = mobile;
+
+    const user = await User.create(userData);
 
     // Generate token
     const token = generateToken(user._id);
@@ -48,43 +59,39 @@ exports.register = async (req, res, next) => {
   }
 };
 
-// @desc    Login user
+// @desc    Login user (passwordless - email or phone only)
 // @route   POST /api/auth/login
 // @access  Public
 exports.login = async (req, res, next) => {
   try {
-    const { email, mobile, password, identifier } = req.body;
+    const { email, mobile, identifier } = req.body;
     const loginIdentifier = (identifier || email || mobile || '').trim();
 
-    // Validate email & password
-    if (!loginIdentifier || !password) {
+    if (!loginIdentifier) {
       return res.status(400).json({
         success: false,
-        message: 'Please provide email or phone and password'
+        message: 'Please provide email or phone number'
       });
     }
 
-    // Check for user
+    // Find user by email or mobile
     const isEmailLogin = loginIdentifier.includes('@') || !!email;
     const query = isEmailLogin
       ? { email: loginIdentifier.toLowerCase() }
       : { mobile: loginIdentifier };
-    const user = await User.findOne(query).select('+password');
+    const user = await User.findOne(query);
 
     if (!user) {
       return res.status(401).json({
         success: false,
-        message: 'Invalid credentials'
+        message: 'No account found with this email or phone number'
       });
     }
 
-    // Check if password matches
-    const isMatch = await user.comparePassword(password);
-
-    if (!isMatch) {
-      return res.status(401).json({
+    if (!user.isActive) {
+      return res.status(403).json({
         success: false,
-        message: 'Invalid credentials'
+        message: 'Account is deactivated'
       });
     }
 
@@ -92,7 +99,6 @@ exports.login = async (req, res, next) => {
     user.lastLogin = Date.now();
     await user.save();
 
-    // Generate token
     const token = generateToken(user._id);
 
     res.status(200).json({
@@ -130,11 +136,14 @@ exports.getMe = async (req, res, next) => {
 // @access  Private
 exports.updateProfile = async (req, res, next) => {
   try {
-    const { name, mobile, place, gender } = req.body;
+    const { name, email, mobile, place, gender } = req.body;
+    const updates = { name, place, gender };
+    if (email !== undefined) updates.email = email ? email.toLowerCase() : null;
+    if (mobile !== undefined) updates.mobile = mobile || null;
 
     const user = await User.findByIdAndUpdate(
       req.user.id,
-      { name, mobile, place, gender },
+      updates,
       { new: true, runValidators: true }
     );
 
@@ -147,33 +156,3 @@ exports.updateProfile = async (req, res, next) => {
   }
 };
 
-// @desc    Change password
-// @route   PUT /api/auth/change-password
-// @access  Private
-exports.changePassword = async (req, res, next) => {
-  try {
-    const { currentPassword, newPassword } = req.body;
-
-    const user = await User.findById(req.user.id).select('+password');
-
-    // Check current password
-    const isMatch = await user.comparePassword(currentPassword);
-    if (!isMatch) {
-      return res.status(401).json({
-        success: false,
-        message: 'Current password is incorrect'
-      });
-    }
-
-    // Update password
-    user.password = newPassword;
-    await user.save();
-
-    res.status(200).json({
-      success: true,
-      message: 'Password updated successfully'
-    });
-  } catch (error) {
-    next(error);
-  }
-};

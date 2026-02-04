@@ -6,7 +6,6 @@ export const authAPI = {
   login: (data) => API.post('/auth/login', data),
   getMe: () => API.get('/auth/me'),
   updateProfile: (data) => API.put('/auth/profile', data),
-  changePassword: (data) => API.put('/auth/change-password', data),
 };
 
 // Booth APIs
