@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import { feedbackAPI } from '../services/apiServices';
 import { toast } from 'react-toastify';
-import { FaStar, FaRegStar, FaPaperPlane } from 'react-icons/fa';
+import { FaStar, FaRegStar, FaPaperPlane, FaSignInAlt } from 'react-icons/fa';
 
 const Feedback = () => {
+  const { isAuthenticated } = useAuth();
   const [formData, setFormData] = useState({
     ratings: {
       overallQuality: 0,
@@ -197,23 +200,36 @@ const Feedback = () => {
         </div>
 
         {/* Submit Button */}
-        <button
-          type="submit"
-          disabled={submitting}
-          className="w-full flex items-center justify-center space-x-3 bg-primary-600 text-white py-4 rounded-lg font-semibold text-lg hover:bg-primary-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {submitting ? (
-            <>
-              <div className="spinner w-6 h-6 border-2"></div>
-              <span>Submitting...</span>
-            </>
-          ) : (
-            <>
-              <FaPaperPlane />
-              <span>Submit Feedback</span>
-            </>
-          )}
-        </button>
+        {isAuthenticated ? (
+          <button
+            type="submit"
+            disabled={submitting}
+            className="w-full flex items-center justify-center space-x-3 bg-primary-600 text-white py-4 rounded-lg font-semibold text-lg hover:bg-primary-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {submitting ? (
+              <>
+                <div className="spinner w-6 h-6 border-2"></div>
+                <span>Submitting...</span>
+              </>
+            ) : (
+              <>
+                <FaPaperPlane />
+                <span>Submit Feedback</span>
+              </>
+            )}
+          </button>
+        ) : (
+          <div className="text-center py-4">
+            <p className="text-gray-600 mb-3">Please login to submit your feedback</p>
+            <Link
+              to="/login"
+              className="inline-flex items-center space-x-2 bg-primary-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-primary-700 transition"
+            >
+              <FaSignInAlt />
+              <span>Login to Submit</span>
+            </Link>
+          </div>
+        )}
       </form>
 
       {/* Info Note */}

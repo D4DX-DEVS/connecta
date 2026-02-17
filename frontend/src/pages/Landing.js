@@ -14,7 +14,7 @@ const Landing = () => {
         <p className="mt-3 text-gray-600 text-lg">Welcome to the Exhibition Platform</p>
         <button
           type="button"
-          onClick={() => navigate('/login')}
+          onClick={() => navigate('/home')}
           className="mt-8 bg-primary-600 text-white px-10 py-3 rounded-2xl font-semibold hover:bg-primary-700 transition-morph shadow-lg"
         >
           Visit

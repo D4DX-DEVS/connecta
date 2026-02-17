@@ -26,9 +26,13 @@ API.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      localStorage.removeItem('user');
-      window.location.href = '/login';
+      // Only clear stored credentials if they exist (user was logged in)
+      // Do not redirect - public users should not be forced to login
+      const token = localStorage.getItem('token');
+      if (token) {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+      }
     }
     return Promise.reject(error);
   }
