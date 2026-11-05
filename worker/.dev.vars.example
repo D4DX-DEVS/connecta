@@ -1,0 +1,2 @@
+JWT_SECRET=change-me
+CORS_ORIGIN=http://localhost:3000

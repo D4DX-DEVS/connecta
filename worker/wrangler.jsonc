@@ -1,0 +1,17 @@
+{
+  "name": "connecta",
+  "main": "src/index.js",
+  "compatibility_date": "2025-09-01",
+  "d1_databases": [
+    { "binding": "DB", "database_name": "connecta", "database_id": "511af870-f584-4e3d-87ef-1291a26e20c2", "migrations_dir": "migrations" }
+  ],
+  "r2_buckets": [{ "binding": "UPLOADS", "bucket_name": "connecta-uploads" }],
+  "assets": {
+    "directory": "../frontend/build",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*", "/files/*"]
+  },
+  "preview_urls": false,
+  "vars": { "JWT_EXPIRE": "7d", "UPLOAD_FOLDER": "connecta" }
+}

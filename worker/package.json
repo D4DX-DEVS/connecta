@@ -1,0 +1,12 @@
+{
+  "name": "connecta-worker",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "node -e \"require('fs').rmSync('../frontend/build/_redirects',{force:true})\" && wrangler deploy",
+    "db:init": "wrangler d1 migrations apply connecta"
+  },
+  "dependencies": { "hono": "^4.6.0" },
+  "devDependencies": { "wrangler": "^4.0.0" }
+}
